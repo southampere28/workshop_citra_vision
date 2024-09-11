@@ -10,7 +10,7 @@
 
 import os
 import cv2
-from PIL import Image
+from PIL import Image, ImageOps
 import numpy as np
 import sys
 from io import BytesIO
@@ -829,6 +829,15 @@ class Ui_MainWindow(object):
         else:
             print("Unsupported image format or channel number.")
 
+    def transformTranslation(self, x_shift, y_shift):
+        image = self.imagefile
+        
+        width, height = image.size
+        translation_matrix = (1, 0, x_shift, 0, 1, y_shift)
+        translated_image = image.transform((width, height), Image.AFFINE, translation_matrix)
+
+        translated_image.show()
+
     def saveAs(self):
         if hasattr(self, 'imageResult') and self.imageResult is not None:
             # Buka dialog untuk memilih lokasi dan memberi nama file
@@ -900,6 +909,10 @@ class Ui_MainWindow(object):
         self.menuHIstogram.setObjectName("menuHIstogram")
         self.menuColors = QtWidgets.QMenu(self.menubar)
         self.menuColors.setObjectName("menuColors")
+        self.menuTransform = QtWidgets.QMenu(self.menubar)
+        self.menuTransform.setObjectName("menuTransform")
+        self.menuTranslate = QtWidgets.QMenu(self.menuTransform)
+        self.menuTranslate.setObjectName("menuTranslate")
         self.menuRGB = QtWidgets.QMenu(self.menuColors)
         self.menuRGB.setObjectName("menuRGB")
         self.menuRGB_to_Grayscale = QtWidgets.QMenu(self.menuColors)
@@ -1091,6 +1104,11 @@ class Ui_MainWindow(object):
         # self.actionFuzzy_Grayscale.triggered.connect(self.fhe_grayscale)
         self.actionFuzzy_Grayscale.triggered.connect(self.fhe_grayscale)
 
+        # action transform translation
+        self.actionTranslation = QtWidgets.QAction(MainWindow)
+        self.actionTranslation.setObjectName("actionTranslation")
+        self.actionTranslation.triggered.connect(lambda: self.transformTranslation(50, 5))
+
         self.actionIdentity = QtWidgets.QAction(MainWindow)
         self.actionIdentity.setObjectName("actionIdentity")
         self.actionSharpen = QtWidgets.QAction(MainWindow)
@@ -1174,6 +1192,7 @@ class Ui_MainWindow(object):
         self.menuColors.addAction(self.actionLog_Brightness)
         self.menuColors.addAction(self.menuBit_Depth.menuAction())
         self.menuColors.addAction(self.actionGamma_Correction)
+        self.menuTransform.addAction(self.actionTranslation)
         self.menuHistogram_Equalization.addAction(self.actionHistogram_Equalization)
         self.menuHistogram_Equalization.addAction(self.actionFuzzy_HE_RGB)
         self.menuHistogram_Equalization.addAction(self.actionFuzzy_Grayscale)
@@ -1208,6 +1227,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuINput.menuAction())
         self.menubar.addAction(self.menuColors.menuAction())
+        self.menubar.addAction(self.menuTransform.menuAction())
         self.menubar.addAction(self.menuTentang.menuAction())
         self.menubar.addAction(self.menuHistogram_Equalization.menuAction())
         self.menubar.addAction(self.menuAritmetical_Operation.menuAction())
@@ -1226,6 +1246,8 @@ class Ui_MainWindow(object):
         self.menuINput.setTitle(_translate("MainWindow", "View"))
         self.menuHIstogram.setTitle(_translate("MainWindow", "HIstogram"))
         self.menuColors.setTitle(_translate("MainWindow", "Colors"))
+        self.menuTransform.setTitle(_translate("MainWindow", "Transform"))
+        self.actionTranslation.setText(_translate("MainWindow", "Translation"))
         self.menuRGB.setTitle(_translate("MainWindow", "RGB"))
         self.menuRGB_to_Grayscale.setTitle(_translate("MainWindow", "RGB to Grayscale"))
         self.menuQuantize.setTitle(_translate("MainWindow", "Quantize"))
