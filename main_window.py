@@ -838,6 +838,25 @@ class Ui_MainWindow(object):
 
         translated_image.show()
 
+    def rotateImage(self, angle):
+        image = self.imagefile
+        rotated_image = image.rotate(angle, expand=True)
+        rotated_image.show()
+
+    def flipImage(self, mode = 'horizontal'):
+        image = self.imagefile
+        if mode == 'horizontal':
+            flipped_image = ImageOps.mirror(image)
+        elif mode == 'vertical':
+            flipped_image = ImageOps.flip(image)
+        flipped_image.show()
+
+    def zoom_image(self, zoom_factor):
+        image = self.imagefile
+        width, height = image.size
+        zoomed_image = image.resize((int(width * zoom_factor), int(height * zoom_factor)))
+        zoomed_image.show()
+
     def saveAs(self):
         if hasattr(self, 'imageResult') and self.imageResult is not None:
             # Buka dialog untuk memilih lokasi dan memberi nama file
@@ -913,6 +932,12 @@ class Ui_MainWindow(object):
         self.menuTransform.setObjectName("menuTransform")
         self.menuTranslate = QtWidgets.QMenu(self.menuTransform)
         self.menuTranslate.setObjectName("menuTranslate")
+        self.menuRotate = QtWidgets.QMenu(self.menuTransform)
+        self.menuRotate.setObjectName("menuRotate")
+        self.menuFlipping = QtWidgets.QMenu(self.menuTransform)
+        self.menuFlipping.setObjectName("menuFlipping")
+        self.menuZoom = QtWidgets.QMenu(self.menuTransform)
+        self.menuZoom.setObjectName("menuZoom")
         self.menuRGB = QtWidgets.QMenu(self.menuColors)
         self.menuRGB.setObjectName("menuRGB")
         self.menuRGB_to_Grayscale = QtWidgets.QMenu(self.menuColors)
@@ -1107,7 +1132,22 @@ class Ui_MainWindow(object):
         # action transform translation
         self.actionTranslation = QtWidgets.QAction(MainWindow)
         self.actionTranslation.setObjectName("actionTranslation")
-        self.actionTranslation.triggered.connect(lambda: self.transformTranslation(50, 5))
+        self.actionTranslation.triggered.connect(lambda: self.transformTranslation(50, 50))
+
+        # action transform rotate
+        self.actionRotate = QtWidgets.QAction(MainWindow)
+        self.actionRotate.setObjectName("actionRotate")
+        self.actionRotate.triggered.connect(lambda: self.rotateImage(90))
+
+        # action transform flipping
+        self.actionFlipping = QtWidgets.QAction(MainWindow)
+        self.actionFlipping.setObjectName("actionFlipping")
+        self.actionFlipping.triggered.connect(lambda: self.flipImage('horizontal'))
+
+        # action transform zoom
+        self.actionZoom = QtWidgets.QAction(MainWindow)
+        self.actionZoom.setObjectName("actionZoom")
+        self.actionZoom.triggered.connect(lambda: self.zoom_image(2))
 
         self.actionIdentity = QtWidgets.QAction(MainWindow)
         self.actionIdentity.setObjectName("actionIdentity")
@@ -1193,6 +1233,9 @@ class Ui_MainWindow(object):
         self.menuColors.addAction(self.menuBit_Depth.menuAction())
         self.menuColors.addAction(self.actionGamma_Correction)
         self.menuTransform.addAction(self.actionTranslation)
+        self.menuTransform.addAction(self.actionRotate)
+        self.menuTransform.addAction(self.actionFlipping)
+        self.menuTransform.addAction(self.actionZoom)
         self.menuHistogram_Equalization.addAction(self.actionHistogram_Equalization)
         self.menuHistogram_Equalization.addAction(self.actionFuzzy_HE_RGB)
         self.menuHistogram_Equalization.addAction(self.actionFuzzy_Grayscale)
@@ -1228,6 +1271,9 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuINput.menuAction())
         self.menubar.addAction(self.menuColors.menuAction())
         self.menubar.addAction(self.menuTransform.menuAction())
+        # self.menubar.addAction(self.menuRotate.menuAction())
+        # self.menubar.addAction(self.menuFlipping.menuAction())
+        # self.menubar.addAction(self.menuZoom.menuAction())
         self.menubar.addAction(self.menuTentang.menuAction())
         self.menubar.addAction(self.menuHistogram_Equalization.menuAction())
         self.menubar.addAction(self.menuAritmetical_Operation.menuAction())
@@ -1248,6 +1294,9 @@ class Ui_MainWindow(object):
         self.menuColors.setTitle(_translate("MainWindow", "Colors"))
         self.menuTransform.setTitle(_translate("MainWindow", "Transform"))
         self.actionTranslation.setText(_translate("MainWindow", "Translation"))
+        self.actionRotate.setText(_translate("MainWindow", "Rotate"))
+        self.actionFlipping.setText(_translate("MainWindow", "Flip"))
+        self.actionZoom.setText(_translate("MainWindow", "Zoom"))
         self.menuRGB.setTitle(_translate("MainWindow", "RGB"))
         self.menuRGB_to_Grayscale.setTitle(_translate("MainWindow", "RGB to Grayscale"))
         self.menuQuantize.setTitle(_translate("MainWindow", "Quantize"))
