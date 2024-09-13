@@ -18,8 +18,10 @@ from matplotlib import pyplot as plt
 import tempfile
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QSlider, QDialog, QVBoxLayout, QLabel, QPushButton, QApplication, QGraphicsPixmapItem
+from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QSlider, QDialog, QVBoxLayout, QLabel, QPushButton, QApplication, QGraphicsPixmapItem, QInputDialog
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+
+from cropdialog import CropDialog
 
 class Ui_MainWindow(object):
 
@@ -829,6 +831,19 @@ class Ui_MainWindow(object):
         else:
             print("Unsupported image format or channel number.")
 
+    def showTransformTranslation(self):
+        
+        tx, ok = QInputDialog.getDouble(MainWindow, "Input Translation X", "Masukkan nilai translasi x:", 100)
+        if ok:
+            ty, ok = QInputDialog.getDouble(MainWindow, "Input Translation Y", "Masukkan nilai translasi y:", 50)
+            if ok:
+                self.transformTranslation(tx, ty)
+    
+    def showTransformZoom(self):
+        zoom_factor, ok = QInputDialog.getDouble(MainWindow, "Input Nilai Zoom", "Masukkan nilai zoom anda:", 1.5)
+        if ok:
+            self.zoom_image(zoom_factor)
+    
     def transformTranslation(self, x_shift, y_shift):
         image = self.imagefile
         
@@ -836,12 +851,71 @@ class Ui_MainWindow(object):
         translation_matrix = (1, 0, x_shift, 0, 1, y_shift)
         translated_image = image.transform((width, height), Image.AFFINE, translation_matrix)
 
-        translated_image.show()
+        # return translated_image
+        # translated_image.show()
+
+        self.imageResult = translated_image
+        # Image.fromarray(grayscale_image).save('output_asset/grayscale_image_luminance.jpeg')
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            translated_image.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # img_pixmap = QtGui.QPixmap.fromImage(img_pixmap)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
+    def showRotateImage(self):
+        rotate_deg, ok = QInputDialog.getDouble(MainWindow, "Input Nilai Derajat", "Masukkan nilai derajat rotasi:", 45)
+        if ok:
+            self.rotateImage(rotate_deg)
 
     def rotateImage(self, angle):
         image = self.imagefile
         rotated_image = image.rotate(angle, expand=True)
-        rotated_image.show()
+        
+        self.imageResult = rotated_image
+        # Image.fromarray(grayscale_image).save('output_asset/grayscale_image_luminance.jpeg')
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            rotated_image.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
 
     def flipImage(self, mode = 'horizontal'):
         image = self.imagefile
@@ -849,13 +923,112 @@ class Ui_MainWindow(object):
             flipped_image = ImageOps.mirror(image)
         elif mode == 'vertical':
             flipped_image = ImageOps.flip(image)
-        flipped_image.show()
+        
+        self.imageResult = flipped_image
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            flipped_image.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+        
 
     def zoom_image(self, zoom_factor):
         image = self.imagefile
         width, height = image.size
         zoomed_image = image.resize((int(width * zoom_factor), int(height * zoom_factor)))
-        zoomed_image.show()
+        
+        self.imageResult = zoomed_image
+        # Image.fromarray(grayscale_image).save('output_asset/grayscale_image_luminance.jpeg')
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            zoomed_image.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # img_pixmap = QtGui.QPixmap.fromImage(img_pixmap)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
+    # def crop_image(self):
+    #     image = self.imagefile
+
+    #     left = 50
+    #     top = 50
+    #     right = 350
+    #     bottom = 250
+
+    #     cropped_image = image.crop((left, top, right, bottom))
+
+    #     cropped_image.show()
+
+    def show_crop_dialog(self):
+        if not self.imagefile:
+            QtWidgets.QMessageBox.warning(self, "Warning", "No image loaded.")
+            return
+        
+        # Show the crop dialog
+        dialog = CropDialog(self.imagefile, MainWindow)
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            crop_rect = dialog.get_crop_rect()
+            self.crop_image(crop_rect)
+
+    def crop_image(self, rect):
+        # Ensure an image is loaded
+        if not self.imagefile:
+            QtWidgets.QMessageBox.warning(self, "Warning", "No image loaded.")
+            return
+        
+        # Crop the image with the provided coordinates
+        left, top, right, bottom = map(int, [rect.left(), rect.top(), rect.right(), rect.bottom()])
+        cropped_image = self.imagefile.crop((left, top, right, bottom))
+        self.imageResult = cropped_image
+
+        # Save the cropped image to a temporary file and load it into QPixmap
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            cropped_image.save(temp_file_path)
+        
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+        self.sceneOutput.clear()
+        self.sceneOutput.addPixmap(img_pixmap)
+        self.graphicsView_2.setScene(self.sceneOutput)
+        self.graphicsView_2.fitInView(self.sceneOutput.sceneRect(), QtCore.Qt.KeepAspectRatio)
+        
+        os.remove(temp_file_path)
 
     def saveAs(self):
         if hasattr(self, 'imageResult') and self.imageResult is not None:
@@ -938,6 +1111,8 @@ class Ui_MainWindow(object):
         self.menuFlipping.setObjectName("menuFlipping")
         self.menuZoom = QtWidgets.QMenu(self.menuTransform)
         self.menuZoom.setObjectName("menuZoom")
+        self.menuCrop = QtWidgets.QMenu(self.menuTransform)
+        self.menuCrop.setObjectName("menuCrop")
         self.menuRGB = QtWidgets.QMenu(self.menuColors)
         self.menuRGB.setObjectName("menuRGB")
         self.menuRGB_to_Grayscale = QtWidgets.QMenu(self.menuColors)
@@ -1132,23 +1307,32 @@ class Ui_MainWindow(object):
         # action transform translation
         self.actionTranslation = QtWidgets.QAction(MainWindow)
         self.actionTranslation.setObjectName("actionTranslation")
-        self.actionTranslation.triggered.connect(lambda: self.transformTranslation(50, 50))
+        self.actionTranslation.triggered.connect(self.showTransformTranslation)
 
         # action transform rotate
         self.actionRotate = QtWidgets.QAction(MainWindow)
         self.actionRotate.setObjectName("actionRotate")
-        self.actionRotate.triggered.connect(lambda: self.rotateImage(90))
+        self.actionRotate.triggered.connect(self.showRotateImage)
 
         # action transform flipping
-        self.actionFlipping = QtWidgets.QAction(MainWindow)
-        self.actionFlipping.setObjectName("actionFlipping")
-        self.actionFlipping.triggered.connect(lambda: self.flipImage('horizontal'))
+        self.actionFlippingHorizontal = QtWidgets.QAction(MainWindow)
+        self.actionFlippingHorizontal.setObjectName("actionFlippingHorizontal")
+        self.actionFlippingHorizontal.triggered.connect(lambda: self.flipImage('horizontal'))
+        
+        self.actionFlippingVertical = QtWidgets.QAction(MainWindow)
+        self.actionFlippingVertical.setObjectName("actionFlippingVertical")
+        self.actionFlippingVertical.triggered.connect(lambda: self.flipImage('vertical'))
 
         # action transform zoom
         self.actionZoom = QtWidgets.QAction(MainWindow)
         self.actionZoom.setObjectName("actionZoom")
-        self.actionZoom.triggered.connect(lambda: self.zoom_image(2))
+        self.actionZoom.triggered.connect(self.showTransformZoom)
 
+        # action transform crop
+        self.actionCrop = QtWidgets.QAction(MainWindow)
+        self.actionCrop.setObjectName("actionCrop")
+        self.actionCrop.triggered.connect(self.show_crop_dialog)
+        
         self.actionIdentity = QtWidgets.QAction(MainWindow)
         self.actionIdentity.setObjectName("actionIdentity")
         self.actionSharpen = QtWidgets.QAction(MainWindow)
@@ -1234,8 +1418,11 @@ class Ui_MainWindow(object):
         self.menuColors.addAction(self.actionGamma_Correction)
         self.menuTransform.addAction(self.actionTranslation)
         self.menuTransform.addAction(self.actionRotate)
-        self.menuTransform.addAction(self.actionFlipping)
+        self.menuTransform.addAction(self.menuFlipping.menuAction())
+        self.menuFlipping.addAction(self.actionFlippingHorizontal)
+        self.menuFlipping.addAction(self.actionFlippingVertical)
         self.menuTransform.addAction(self.actionZoom)
+        self.menuTransform.addAction(self.actionCrop)
         self.menuHistogram_Equalization.addAction(self.actionHistogram_Equalization)
         self.menuHistogram_Equalization.addAction(self.actionFuzzy_HE_RGB)
         self.menuHistogram_Equalization.addAction(self.actionFuzzy_Grayscale)
@@ -1271,9 +1458,6 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuINput.menuAction())
         self.menubar.addAction(self.menuColors.menuAction())
         self.menubar.addAction(self.menuTransform.menuAction())
-        # self.menubar.addAction(self.menuRotate.menuAction())
-        # self.menubar.addAction(self.menuFlipping.menuAction())
-        # self.menubar.addAction(self.menuZoom.menuAction())
         self.menubar.addAction(self.menuTentang.menuAction())
         self.menubar.addAction(self.menuHistogram_Equalization.menuAction())
         self.menubar.addAction(self.menuAritmetical_Operation.menuAction())
@@ -1295,7 +1479,10 @@ class Ui_MainWindow(object):
         self.menuTransform.setTitle(_translate("MainWindow", "Transform"))
         self.actionTranslation.setText(_translate("MainWindow", "Translation"))
         self.actionRotate.setText(_translate("MainWindow", "Rotate"))
-        self.actionFlipping.setText(_translate("MainWindow", "Flip"))
+        self.menuFlipping.setTitle(_translate("MainWindow", "Flip"))
+        self.actionFlippingHorizontal.setText(_translate("MainWindow", "Horizontal"))
+        self.actionFlippingVertical.setText(_translate("MainWindow", "Vertical"))
+        self.actionCrop.setText(_translate("MainWindow", "Crop"))
         self.actionZoom.setText(_translate("MainWindow", "Zoom"))
         self.menuRGB.setTitle(_translate("MainWindow", "RGB"))
         self.menuRGB_to_Grayscale.setTitle(_translate("MainWindow", "RGB to Grayscale"))
