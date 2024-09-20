@@ -49,20 +49,20 @@ class MenuSegmentasi:
                             to_check.append((x, y))
 
         # Buat direktori jika belum ada
-        if not os.path.exists(MenuSegmentasi.outputPath):
-            os.makedirs(MenuSegmentasi.outputPath)
+        # if not os.path.exists(MenuSegmentasi.outputPath):
+        #     os.makedirs(MenuSegmentasi.outputPath)
         
         # Konversi array numpy menjadi gambar PIL
         segmented_image_pil = Image.fromarray(segmented)
         
         # Simpan gambar dengan nama file yang benar
-        segmented_image_pil.save(MenuSegmentasi.outputFile)
+        # segmented_image_pil.save(MenuSegmentasi.outputFile)
 
         # Tampilkan gambar asli dan hasil segmentasi
-        image_ori = cv2.imread(image_path)
-        MenuSegmentasi.plot_images(image_ori, segmented)
+        # image_ori = cv2.imread(image_path)
+        # MenuSegmentasi.plot_images(image_ori, segmented)
 
-        return MenuSegmentasi.outputFile
+        return segmented_image_pil
     
     def kmeans_clustering(image_path, k):
         # Membaca citra grayscale
@@ -80,20 +80,20 @@ class MenuSegmentasi:
         segmented_image = segmented_image.reshape(image.shape)
 
         # Buat direktori jika belum ada
-        if not os.path.exists(MenuSegmentasi.outputPath):
-            os.makedirs(MenuSegmentasi.outputPath)
+        # if not os.path.exists(MenuSegmentasi.outputPath):
+        #     os.makedirs(MenuSegmentasi.outputPath)
 
         # Konversi array numpy menjadi gambar PIL
         kmeans_image_pil = Image.fromarray(segmented_image)
         
         # Simpan gambar dengan nama file yang benar
-        kmeans_image_pil.save(MenuSegmentasi.outputFile)
+        # kmeans_image_pil.save(MenuSegmentasi.outputFile)
 
         # Tampilkan gambar asli dan hasil klasterisasi
-        image_ori = cv2.imread(image_path)
-        MenuSegmentasi.plot_images(image_ori, segmented_image)
+        # image_ori = cv2.imread(image_path)
+        # MenuSegmentasi.plot_images(image_ori, segmented_image)
 
-        return MenuSegmentasi.outputFile
+        return kmeans_image_pil
     
     def watershed_segmentation(image_path):
         # Membaca citra grayscale
@@ -214,7 +214,7 @@ class MenuSegmentasi:
 image_path = "sample/image.jpeg"
 seed = (10, 10)  # Koordinat seed point
 threshold_value = 20  # Threshold
-MenuSegmentasi.region_growing(image_path, seed, threshold_value)
+# MenuSegmentasi.region_growing(image_path, seed, threshold_value)
 # MenuSegmentasi.kmeans_clustering(image_path, 2)
 # MenuSegmentasi.watershed_segmentation(image_path)
 # MenuSegmentasi.global_thresholding(image_path, 100)

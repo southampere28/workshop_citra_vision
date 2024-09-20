@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QSlider, QDialog, QVBox
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from cropdialog import CropDialog
+from menusegmentasi import MenuSegmentasi as ms
 
 class Ui_MainWindow(object):
 
@@ -983,17 +984,67 @@ class Ui_MainWindow(object):
         # delete temp file
         os.remove(temp_file_path)
 
-    # def crop_image(self):
-    #     image = self.imagefile
+    def segment_region_grow(self, seed, threshold_value):
+        image_path = self.imagePath
+        output = ms.region_growing(image_path, seed, threshold_value)
 
-    #     left = 50
-    #     top = 50
-    #     right = 350
-    #     bottom = 250
+        self.imageResult = output
 
-    #     cropped_image = image.crop((left, top, right, bottom))
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
 
-    #     cropped_image.show()
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
+    def segment_kmeans_clustering(self, k):
+        pathimg = self.imagePath
+        output = ms.kmeans_clustering(pathimg, k)
+
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
+    def segment_watershed(self):
+        pathimg = self.imagePath
+        output = ms.watershed_segmentation(pathimg)
 
     def show_crop_dialog(self):
         if not self.imagefile:
@@ -1333,8 +1384,14 @@ class Ui_MainWindow(object):
         self.actionCrop.setObjectName("actionCrop")
         self.actionCrop.triggered.connect(self.show_crop_dialog)
         
+        # identify Menu
         self.actionIdentity = QtWidgets.QAction(MainWindow)
         self.actionIdentity.setObjectName("actionIdentity")
+        # self.actionIdentity.triggered.connect(lambda: self.segment_region_grow((10, 10), 20))
+        # self.actionIdentity.triggered.connect(lambda: self.segment_kmeans_clustering(2))
+        # self.actionIdentity.triggered.connect(self.segment_watershed)
+        # self.actionIdentity.triggered.connect(self.)
+        
         self.actionSharpen = QtWidgets.QAction(MainWindow)
         self.actionSharpen.setObjectName("actionSharpen")
         self.actionUnsharp_Masking = QtWidgets.QAction(MainWindow)
