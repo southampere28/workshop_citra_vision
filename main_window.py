@@ -1054,6 +1054,118 @@ class Ui_MainWindow(object):
         pathimg = self.imagePath
         output = ms.watershed_segmentation(pathimg)
 
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
+    def segment_Global_Thresholding(self, valtrh):
+        pathimg = self.imagePath
+        output = ms.global_thresholding(pathimg, valtrh)
+
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
+    def segment_adaptive_thresh_mean(self):
+        pathimg = self.imagePath
+        output = ms.adaptive_thresh_mean(pathimg)
+
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
+    def segment_adaptive_thresh_gaussian(self):
+        pathimg = self.imagePath
+        output = ms.adaptive_thresh_mean(pathimg)
+
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
     def show_crop_dialog(self):
         if not self.imagefile:
             QtWidgets.QMessageBox.warning(self, "Warning", "No image loaded.")
@@ -1409,12 +1521,12 @@ class Ui_MainWindow(object):
         # action region growing
         self.actionRegion_Growing = QtWidgets.QAction(MainWindow)
         self.actionRegion_Growing.setObjectName("actionRegion_Growing")
-        self.actionRegion_Growing.triggered.connect(self.segment_region_grow)
+        self.actionRegion_Growing.triggered.connect(lambda: self.segment_region_grow((10, 10), 20))
 
         # action kmeans clustering
         self.actionKmeans_Clustering = QtWidgets.QAction(MainWindow)
         self.actionKmeans_Clustering.setObjectName("actionKmeans_Clustering")
-        self.actionKmeans_Clustering.triggered.connect(self.segment_kmeans_clustering)
+        self.actionKmeans_Clustering.triggered.connect(lambda: self.segment_kmeans_clustering(2))
         
         # action watershed segmentesi
         self.actionWatershed_Segmentation = QtWidgets.QAction(MainWindow)
@@ -1424,17 +1536,17 @@ class Ui_MainWindow(object):
         # action global thresholding
         self.actionGlobal_Thresholding = QtWidgets.QAction(MainWindow)
         self.actionGlobal_Thresholding.setObjectName("actionGlobal_Thresholding")
-        # self.actionGlobal_Thresholding.triggered.connect(self.)
+        self.actionGlobal_Thresholding.triggered.connect(lambda: self.segment_Global_Thresholding(100))
 
         # action adaptive thresh mean
         self.actionAdaptive_Thresh_Mean = QtWidgets.QAction(MainWindow)
         self.actionAdaptive_Thresh_Mean.setObjectName("actionAdaptive_Thresh_Mean")
-        # self.actionAdaptive_Thresh_Mean.triggered.connect(self.ada)
+        self.actionAdaptive_Thresh_Mean.triggered.connect(self.segment_adaptive_thresh_mean)
 
         # aaction adaptive thresh gaussian
         self.actionAdaptive_Thresh_Gaussian = QtWidgets.QAction(MainWindow)
-        self.actionAdaptive_Thresh_Gaussian.setObjectName("actionAdaptive_Thresh_Mean")
-        # self.actionAdaptive_Thresh_Gaussian.triggered.connect(self.)
+        self.actionAdaptive_Thresh_Gaussian.setObjectName("actionAdaptive_Thresh_Gaussian")
+        self.actionAdaptive_Thresh_Gaussian.triggered.connect(self.segment_adaptive_thresh_gaussian)
         
         # identify Menu
         self.actionIdentity = QtWidgets.QAction(MainWindow)

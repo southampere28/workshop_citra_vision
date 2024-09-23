@@ -126,20 +126,20 @@ class MenuSegmentasi:
         image[markers == -1] = [255]  # Garis watershed
 
         # Buat direktori jika belum ada
-        if not os.path.exists(MenuSegmentasi.outputPath):
-            os.makedirs(MenuSegmentasi.outputPath)
+        # if not os.path.exists(MenuSegmentasi.outputPath):
+        #     os.makedirs(MenuSegmentasi.outputPath)
 
         # Konversi array numpy menjadi gambar PIL
         watershed_image_pil = Image.fromarray(image)
 
-        # Simpan gambar dengan nama file yang benar
-        watershed_image_pil.save(MenuSegmentasi.outputFile)
+        # # Simpan gambar dengan nama file yang benar
+        # watershed_image_pil.save(MenuSegmentasi.outputFile)
 
-        # Tampilkan gambar asli dan hasil watershed
-        image_ori = cv2.imread(image_path)
-        MenuSegmentasi.plot_images(image_ori, image)
+        # # Tampilkan gambar asli dan hasil watershed
+        # image_ori = cv2.imread(image_path)
+        # MenuSegmentasi.plot_images(image_ori, image)
 
-        return MenuSegmentasi.outputFile
+        return watershed_image_pil
     
     def global_thresholding(image_path, threshold_value):
         # Membaca citra grayscale
@@ -149,20 +149,20 @@ class MenuSegmentasi:
         _, binary_image = cv2.threshold(image, threshold_value, 255, cv2.THRESH_BINARY)
         
         # Buat direktori jika belum ada
-        if not os.path.exists(MenuSegmentasi.outputPath):
-            os.makedirs(MenuSegmentasi.outputPath)
+        # if not os.path.exists(MenuSegmentasi.outputPath):
+        #     os.makedirs(MenuSegmentasi.outputPath)
 
         # Konversi array numpy menjadi gambar PIL
         binary_image_pil = Image.fromarray(binary_image)
         
-        # Simpan gambar dengan nama file yang benar
-        binary_image_pil.save(MenuSegmentasi.outputFile)
+        # # Simpan gambar dengan nama file yang benar
+        # binary_image_pil.save(MenuSegmentasi.outputFile)
 
-        # Tampilkan gambar asli dan hasil global thresholding
-        image_ori = cv2.imread(image_path)
-        MenuSegmentasi.plot_images(image_ori, binary_image)
+        # # Tampilkan gambar asli dan hasil global thresholding
+        # image_ori = cv2.imread(image_path)
+        # MenuSegmentasi.plot_images(image_ori, binary_image)
 
-        return MenuSegmentasi.outputFile
+        return binary_image_pil
     
     def adaptive_thresh_mean(image_path):
         # Membaca citra grayscale
@@ -173,20 +173,21 @@ class MenuSegmentasi:
                                                      cv2.THRESH_BINARY, 11, 2)
 
         # Buat direktori jika belum ada
-        if not os.path.exists(MenuSegmentasi.outputPath):
-            os.makedirs(MenuSegmentasi.outputPath)
+        # if not os.path.exists(MenuSegmentasi.outputPath):
+        #     os.makedirs(MenuSegmentasi.outputPath)
 
         # Konversi array numpy menjadi gambar PIL
         adaptive_mean_image_pil = Image.fromarray(adaptive_thresh_mean)
         
         # Simpan gambar dengan nama file yang benar
-        adaptive_mean_image_pil.save(MenuSegmentasi.outputFile)
+        # adaptive_mean_image_pil.save(MenuSegmentasi.outputFile)
 
         # Tampilkan gambar asli dan hasil thresholding adaptif mean
-        image_ori = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)  # Membaca citra grayscale untuk kesesuaian plot
-        MenuSegmentasi.plot_images(image_ori, adaptive_thresh_mean)
+        # image_ori = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)  # Membaca citra grayscale untuk kesesuaian plot
+        # MenuSegmentasi.plot_images(image_ori, adaptive_thresh_mean)
 
-        return MenuSegmentasi.outputFile
+        return adaptive_mean_image_pil
+    
     def adaptive_thresh_gaussian(image_path):
         # Membaca citra grayscale
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -195,20 +196,20 @@ class MenuSegmentasi:
         adaptive_thresh_gaussian = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                                          cv2.THRESH_BINARY, 11, 2)
         # Buat direktori jika belum ada
-        if not os.path.exists(MenuSegmentasi.outputPath):
-            os.makedirs(MenuSegmentasi.outputPath)
+        # if not os.path.exists(MenuSegmentasi.outputPath):
+        #     os.makedirs(MenuSegmentasi.outputPath)
 
         # Konversi array numpy menjadi gambar PIL
         adaptive_gaussian_image_pil = Image.fromarray(adaptive_thresh_gaussian)
         
         # Simpan gambar dengan nama file yang benar
-        adaptive_gaussian_image_pil.save(MenuSegmentasi.outputFile)
+        # adaptive_gaussian_image_pil.save(MenuSegmentasi.outputFile)
 
         # Tampilkan gambar asli dan hasil thresholding adaptif Gaussian
-        image_ori = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)  # Membaca citra grayscale untuk kesesuaian plot
-        MenuSegmentasi.plot_images(image_ori, adaptive_thresh_gaussian)
+        # image_ori = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)  # Membaca citra grayscale untuk kesesuaian plot
+        # MenuSegmentasi.plot_images(image_ori, adaptive_thresh_gaussian)
 
-        return MenuSegmentasi.outputFile
+        return adaptive_gaussian_image_pil
 
 # Contoh penggunaan
 image_path = "sample/image.jpeg"
