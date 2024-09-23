@@ -1172,6 +1172,20 @@ class Ui_MainWindow(object):
         self.menuZoom.setObjectName("menuZoom")
         self.menuCrop = QtWidgets.QMenu(self.menuTransform)
         self.menuCrop.setObjectName("menuCrop")
+        self.menuSegmentasi = QtWidgets.QMenu(self.menubar)
+        self.menuSegmentasi.setObjectName("menuSegmentasi")
+        self.menuRegion_Growing = QtWidgets.QMenu(self.menuSegmentasi)
+        self.menuRegion_Growing.setObjectName("menuRegion_Growing")
+        self.menuKmeans_Clustering = QtWidgets.QMenu(self.menuSegmentasi)
+        self.menuKmeans_Clustering.setObjectName("menuKmeans_Clustering")
+        self.menuWatershed_Segmentation = QtWidgets.QMenu(self.menuSegmentasi)
+        self.menuWatershed_Segmentation.setObjectName("menuWatershed_Segmentation")
+        self.menuGlobal_Thresholding = QtWidgets.QMenu(self.menuSegmentasi)
+        self.menuGlobal_Thresholding.setObjectName("menuGlobal_Thresholding")
+        self.menuAdaptive_Thresh_Mean = QtWidgets.QMenu(self.menuSegmentasi)
+        self.menuAdaptive_Thresh_Mean.setObjectName("menuAdaptive_Thresh_Mean")
+        self.menuAdaptive_Thresh_Gaussian = QtWidgets.QMenu(self.menuSegmentasi)
+        self.menuAdaptive_Thresh_Gaussian.setObjectName("menuAdaptive_Thresh_Gaussian")
         self.menuRGB = QtWidgets.QMenu(self.menuColors)
         self.menuRGB.setObjectName("menuRGB")
         self.menuRGB_to_Grayscale = QtWidgets.QMenu(self.menuColors)
@@ -1391,6 +1405,36 @@ class Ui_MainWindow(object):
         self.actionCrop = QtWidgets.QAction(MainWindow)
         self.actionCrop.setObjectName("actionCrop")
         self.actionCrop.triggered.connect(self.show_crop_dialog)
+
+        # action region growing
+        self.actionRegion_Growing = QtWidgets.QAction(MainWindow)
+        self.actionRegion_Growing.setObjectName("actionRegion_Growing")
+        self.actionRegion_Growing.triggered.connect(self.segment_region_grow)
+
+        # action kmeans clustering
+        self.actionKmeans_Clustering = QtWidgets.QAction(MainWindow)
+        self.actionKmeans_Clustering.setObjectName("actionKmeans_Clustering")
+        self.actionKmeans_Clustering.triggered.connect(self.segment_kmeans_clustering)
+        
+        # action watershed segmentesi
+        self.actionWatershed_Segmentation = QtWidgets.QAction(MainWindow)
+        self.actionWatershed_Segmentation.setObjectName("actionWatershed_Segmentation")
+        self.actionWatershed_Segmentation.triggered.connect(self.segment_watershed)
+
+        # action global thresholding
+        self.actionGlobal_Thresholding = QtWidgets.QAction(MainWindow)
+        self.actionGlobal_Thresholding.setObjectName("actionGlobal_Thresholding")
+        # self.actionGlobal_Thresholding.triggered.connect(self.)
+
+        # action adaptive thresh mean
+        self.actionAdaptive_Thresh_Mean = QtWidgets.QAction(MainWindow)
+        self.actionAdaptive_Thresh_Mean.setObjectName("actionAdaptive_Thresh_Mean")
+        # self.actionAdaptive_Thresh_Mean.triggered.connect(self.ada)
+
+        # aaction adaptive thresh gaussian
+        self.actionAdaptive_Thresh_Gaussian = QtWidgets.QAction(MainWindow)
+        self.actionAdaptive_Thresh_Gaussian.setObjectName("actionAdaptive_Thresh_Mean")
+        # self.actionAdaptive_Thresh_Gaussian.triggered.connect(self.)
         
         # identify Menu
         self.actionIdentity = QtWidgets.QAction(MainWindow)
@@ -1488,6 +1532,12 @@ class Ui_MainWindow(object):
         self.menuFlipping.addAction(self.actionFlippingVertical)
         self.menuTransform.addAction(self.actionZoom)
         self.menuTransform.addAction(self.actionCrop)
+        self.menuSegmentasi.addAction(self.actionRegion_Growing)
+        self.menuSegmentasi.addAction(self.actionKmeans_Clustering)
+        self.menuSegmentasi.addAction(self.actionWatershed_Segmentation)
+        self.menuSegmentasi.addAction(self.actionGlobal_Thresholding)
+        self.menuSegmentasi.addAction(self.actionAdaptive_Thresh_Mean)
+        self.menuSegmentasi.addAction(self.actionAdaptive_Thresh_Gaussian)
         self.menuHistogram_Equalization.addAction(self.actionHistogram_Equalization)
         self.menuHistogram_Equalization.addAction(self.actionFuzzy_HE_RGB)
         self.menuHistogram_Equalization.addAction(self.actionFuzzy_Grayscale)
@@ -1523,6 +1573,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuINput.menuAction())
         self.menubar.addAction(self.menuColors.menuAction())
         self.menubar.addAction(self.menuTransform.menuAction())
+        self.menubar.addAction(self.menuSegmentasi.menuAction())
         self.menubar.addAction(self.menuTentang.menuAction())
         self.menubar.addAction(self.menuHistogram_Equalization.menuAction())
         self.menubar.addAction(self.menuAritmetical_Operation.menuAction())
@@ -1541,6 +1592,7 @@ class Ui_MainWindow(object):
         self.menuINput.setTitle(_translate("MainWindow", "View"))
         self.menuHIstogram.setTitle(_translate("MainWindow", "HIstogram"))
         self.menuColors.setTitle(_translate("MainWindow", "Colors"))
+        self.menuSegmentasi.setTitle(_translate("MainWindow", "Segmentasi"))
         self.menuTransform.setTitle(_translate("MainWindow", "Transform"))
         self.actionTranslation.setText(_translate("MainWindow", "Translation"))
         self.actionRotate.setText(_translate("MainWindow", "Rotate"))
@@ -1598,6 +1650,12 @@ class Ui_MainWindow(object):
         self.action5_bit.setText(_translate("MainWindow", "5 bit"))
         self.action6_bit.setText(_translate("MainWindow", "6 bit"))
         self.action7_bit.setText(_translate("MainWindow", "7 bit"))
+        self.actionRegion_Growing.setText(_translate("Main Window", "Region Growing"))
+        self.actionKmeans_Clustering.setText(_translate("Main Window", "Kmeans Clustering"))
+        self.actionWatershed_Segmentation.setText(_translate("Main Window", "Watershed Segmentation"))
+        self.actionGlobal_Thresholding.setText(_translate("Main Window", "Global Thresholding"))
+        self.actionAdaptive_Thresh_Mean.setText(_translate("Main Window", "Adaptive Thresh Mean"))
+        self.actionAdaptive_Thresh_Gaussian.setText(_translate("Main Window", "Adaptive Thresh Gaussian"))
         self.actionHistogram_Equalization.setText(_translate("MainWindow", "Histogram Equalization"))
         self.actionFuzzy_HE_RGB.setText(_translate("MainWindow", "Fuzzy HE RGB"))
         self.actionFuzzy_Grayscale.setText(_translate("MainWindow", "Fuzzy Grayscale"))
