@@ -628,58 +628,50 @@ class Ui_MainWindow(object):
 
     # Fuzzy Histogram Equalization Grayscal
     def fhe_grayscale(self):
-        def fuzzy_membership_function(x, mean, stddev):
-            epsilon = 1e-5 # Menambah epsilon agar tdk ada pembagian dengan nol
-            return np.exp(-((x - mean) ** 2) / (2 * (stddev ** 2 + epsilon)))
+        def fuzzy_histogram_equalization_grayscale(image):
+            # Ambil histogram dari gambar
+            hist, bins = np.histogram(image.flatten(), 256, [0, 256])
 
-        def fuzzy_histogram_equalization_grayscale(image, block_size=16):
-            # konversi gambar ke grayscale
-            if len(image.shape) == 3:
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            # Terapkan fuzzy histogram equalization
+            fuzzy_hist = fuzzy_membership(hist)
 
-            height, widht = image.shape #dapatkan dimensi gambar
+            # Hitung cumulative distribution function (CDF)
+            cdf = fuzzy_hist.cumsum()
+            cdf_normalized = cdf * hist.max() / cdf.max()  # Normalisasi
 
-            equalized_image = np.zeros_like(image, dtype=np.uint8) # Buat gambar yang telah di equalize
+            # Gunakan CDF untuk histogram equalization
+            cdf_m = np.ma.masked_equal(cdf, 0)
+            cdf_m = (cdf_m - cdf_m.min()) * 255 / (cdf_m.max() - cdf_m.min())
+            cdf_final = np.ma.filled(cdf_m, 0).astype('uint8')
 
-            # ukuran blok
-            block_height = block_size
-            block_widht = block_size
+            # Mapping nilai pixel berdasarkan CDF yang diubah
+            img_equalized = cdf_final[image]
 
-            for y in range(0, height, block_height):
-                for x in range(0, widht, block_widht):
-                    # definisi batas blok
-                    block = image[y:y+block_height, x:x+block_widht]
-                    if block.size == 0:
-                        continue
+            return img_equalized
 
-                    # hitung histogram lokal
-                    hist, bins = np.histogram(block.flatten(), bins=256, range=[0, 256])
-                    cdf = hist.cumsum()
-                    cdf_normalized = cdf * 256 / cdf[-1]
-                    equalized_block = np.interp(block.flatten(), bins[:-1], cdf_normalized).reshape(block.shape)
+        def fuzzy_membership(hist):
+            # Membuat fuzzy histogram dengan fungsi keanggotaan tertentu
+            # Menggunakan fungsi sigmoid sebagai fungsi keanggotaan fuzzy
+            fuzzy_hist = 1 / (1 + np.exp(-hist))
 
-                    # hitung keanggotaan fuzzy
-                    mean = np.mean(equalized_block)
-                    stddev = np.std(equalized_block)
-                    membership = fuzzy_membership_function(equalized_block, mean, stddev)
+            # Normalisasi fuzzy histogram
+            fuzzy_hist = fuzzy_hist / fuzzy_hist.sum()
 
-                    # Terapkan penyesuaian kontras fuzzy
-                    equalized_image[y:y+block_height, x:x+block_widht] = np.clip(equalized_block * membership, 0, 255).astype(np.uint8)
+            return fuzzy_hist
 
-            return equalized_image
+        # Load gambar grayscale
+        image = cv2.imread(self.imagePath, cv2.IMREAD_GRAYSCALE)
 
-        image = cv2.imread(self.imagePath) 
+        fhe_grayscale = fuzzy_histogram_equalization_grayscale(image)
 
-        fheg_image = fuzzy_histogram_equalization_grayscale(image) # Terapkan fhe
-
-        output_image = Image.fromarray(fheg_image)
+        output_image = Image.fromarray(fhe_grayscale)
         self.imageResult = output_image
 
         # Save image ke temporary file
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
             temp_file_path = temp_file.name
             output_image.save(temp_file_path)
-        
+
         # Load image dari temp file ke QPixmap
         img_pixmap = QtGui.QPixmap(temp_file_path)
 
@@ -696,52 +688,68 @@ class Ui_MainWindow(object):
 
         os.remove(temp_file_path)
     
+    # Fuzzy Histogram Equalization RGB
     def fhe_rgb(self):
-        def fuzzy_membership_function(x, men, stddev):
-            epsilon = 1e-5
-            return np.exp(-((x - men) ** 2) / (2 * (stddev ** 2 + epsilon)))
-
-        def fuzzy_histogram_equalization_rgb(image, block_size=16):
-            height, widht, channels = image.shape
-
-            equalized_image = np.zeros_like(image, dtype=np.uint8)
-
-            for channel in range(channels):
-                channel_data = image[:, :, channel]
-                equalized_channel = np.zeros_like(channel_data, dtype=np.uint8)
-
-                block_height = block_size
-                block_widht = block_size
-
-                for y in range(0, height, block_height):
-                    for x in range(0, widht, block_widht):
-                        block = channel_data[y:y+block_height, x:x+block_widht]
-                        if block.size == 0:
-                            continue
-                        
-                        # hitung histogram lokal
-                        hist, bins = np.histogram(block.flatten(), bins=256, range=[0,256])
-                        cdf = hist.cumsum()
-                        cdf_normalized = cdf * 255 / cdf[-1]
-                        equalized_block = np.interp(block.flatten(), bins[:-1], cdf_normalized).reshape(block.shape)
-
-                        # hitung kranggotaan fuzzy
-                        mean = np.mean(equalized_block)
-                        stddev = np.std(equalized_block)
-                        membership = fuzzy_membership_function(equalized_block, mean, stddev)
-
-                        # terapkan penyesuaian kontras fuzzy
-                        equalized_channel[y:y+block_height, x:x+block_widht] = np.clip(equalized_block * membership, 0, 255).astype(np.uint8)
-
-                equalized_image[:, :, channel] = equalized_channel
+        def fuzzy_histogram_equalization_rgb(image):
+            # Konversi gambar dari BGR (OpenCV) ke RGB
+            img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             
-            return equalized_image
+            # Pisahkan menjadi 3 channel: Red, Green, Blue
+            r, g, b = cv2.split(img_rgb)
+            
+            # Lakukan fuzzy histogram equalization untuk setiap channel
+            r_eq = fuzzy_histogram_equalization(r)
+            g_eq = fuzzy_histogram_equalization(g)
+            b_eq = fuzzy_histogram_equalization(b)
+            
+            # Gabungkan kembali channel-channel yang sudah diproses
+            img_eq = cv2.merge((r_eq, g_eq, b_eq))
+            
+            # Konversi kembali ke format BGR (untuk OpenCV)
+            img_eq_bgr = cv2.cvtColor(img_eq, cv2.COLOR_RGB2BGR)
+            
+            return img_eq_bgr
 
-        image = cv2.imread(self.imagePath) 
+        def fuzzy_histogram_equalization(channel):
+            # Ambil histogram
+            hist, bins = np.histogram(channel.flatten(), 256, [0, 256])
+            
+            # Fungsi keanggotaan fuzzy
+            fuzzy_hist = fuzzy_membership(hist)
+            
+            # Hitung cumulative distribution function (CDF)
+            cdf = fuzzy_hist.cumsum()
+            cdf_normalized = cdf * hist.max() / cdf.max()  # Normalisasi
+            
+            # Gunakan CDF untuk histogram equalization
+            cdf_m = np.ma.masked_equal(cdf, 0)
+            cdf_m = (cdf_m - cdf_m.min()) * 255 / (cdf_m.max() - cdf_m.min())
+            cdf_final = np.ma.filled(cdf_m, 0).astype('uint8')
+            
+            # Mapping nilai pixel berdasarkan CDF yang diubah
+            img_equalized = cdf_final[channel]
+            
+            return img_equalized
 
-        fhe_image_rgb = fuzzy_histogram_equalization_rgb(image) # Terapkan fhe
+        def fuzzy_membership(hist):
+            # Membuat fuzzy histogram dengan fungsi keanggotaan tertentu
+            # Misalnya, menggunakan fungsi sigmoid atau gaussian sebagai dasar fuzzy
+            fuzzy_hist = 1 / (1 + np.exp(-hist))  # Fungsi sigmoid
+            
+            # Normalisasi fuzzy histogram
+            fuzzy_hist = fuzzy_hist / fuzzy_hist.sum()
+            
+            return fuzzy_hist
 
-        output_image = Image.fromarray(fhe_image_rgb)
+        # Load gambar
+        image = cv2.imread(self.imagePath, cv2.IMREAD_COLOR)
+
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Terapkan fuzzy histogram equalization
+        fhe_rgb = fuzzy_histogram_equalization_rgb(image_rgb)
+
+        output_image = Image.fromarray(fhe_rgb)
         self.imageResult = output_image
 
         # Save image ke temporary file
