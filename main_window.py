@@ -18,7 +18,7 @@ from matplotlib import pyplot as plt
 import tempfile
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QSlider, QDialog, QVBoxLayout, QLabel, QPushButton, QApplication, QGraphicsPixmapItem, QInputDialog
+from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QSlider, QDialog, QVBoxLayout, QHBoxLayout, QSpinBox, QLabel, QLineEdit, QDialogButtonBox, QPushButton, QApplication, QGraphicsPixmapItem, QInputDialog
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from cropdialog import CropDialog
@@ -992,6 +992,53 @@ class Ui_MainWindow(object):
         # delete temp file
         os.remove(temp_file_path)
 
+    def show_dialog_regiongrow(self):
+        dialog = QDialog(self.centralwidget)  # Set parent widget (usually centralwidget in a QMainWindow)
+        dialog.setWindowTitle("Input Region Grow Configuration")
+
+        layout = QVBoxLayout()
+
+        h_layout = QHBoxLayout()
+
+        # Label dan input untuk nilai pertama
+        h_layout.addWidget(QLabel("Masukkan nilai seed x"))
+        seedvalx = QSpinBox()
+        seedvalx.setRange(0, 255)
+        h_layout.addWidget(seedvalx)
+
+        # Label dan input untuk nilai kedua
+        h_layout.addWidget(QLabel("Masukkan nilai seed y"))
+        seedvaly = QSpinBox()
+        seedvaly.setRange(0, 255)
+        h_layout.addWidget(seedvaly)
+
+        layout.addLayout(h_layout)
+
+        # treshold value
+        layout.addWidget(QLabel("Masukkan nilai Threshold"))
+        spin_box_threshold = QSpinBox()
+        spin_box_threshold.setRange(0, 255)  # Range contoh untuk threshold
+        layout.addWidget(spin_box_threshold)
+
+        # Tombol Ok
+        ok_button = QPushButton("Ok")
+        ok_button.clicked.connect(lambda: self.applyregiongrow(seedvalx.value(), seedvaly.value(), spin_box_threshold.value(), dialog))
+        layout.addWidget(ok_button)
+
+        # Set layout dan jalankan dialog
+        dialog.setLayout(layout)
+        dialog.exec_()
+
+    def applyregiongrow(self, seed_x, seed_y, treshold, dialog):
+        self.segment_region_grow((seed_x, seed_y), treshold)
+        dialog.accept()
+        
+    # def testes(self):
+    #     value1, value2 = lambda: self.get_two_text_values(self)
+    #     if value1 and value2:  # Pastikan kedua nilai tidak kosong
+    #         print(f"Nilai pertama: {value1}, Nilai kedua: {value2}")
+    #         # Lakukan sesuatu dengan nilai tersebut
+
     def segment_region_grow(self, seed, threshold_value):
         image_path = self.imagePath
         output = ms.region_growing(image_path, seed, threshold_value)
@@ -1020,6 +1067,11 @@ class Ui_MainWindow(object):
         
         # delete temp file
         os.remove(temp_file_path)
+
+    def show_segment_cluster(self):
+        k, ok = QInputDialog.getInt(MainWindow, "Kmeans Cluster Configuration", "Masukkan nilai k:", 2)
+        if ok:
+            self.segment_kmeans_clustering(k)
 
     def segment_kmeans_clustering(self, k):
         pathimg = self.imagePath
@@ -1078,6 +1130,11 @@ class Ui_MainWindow(object):
         
         # delete temp file
         os.remove(temp_file_path)
+
+    def show_segment_globalthreshold(self):
+        valtr, ok = QInputDialog.getInt(MainWindow, "Global Thresholding Configuration", "Masukkan Threshold Value:", 100)
+        if ok:
+            self.segment_Global_Thresholding(valtr)
 
     def segment_Global_Thresholding(self, valtrh):
         pathimg = self.imagePath
@@ -1521,12 +1578,12 @@ class Ui_MainWindow(object):
         # action region growing
         self.actionRegion_Growing = QtWidgets.QAction(MainWindow)
         self.actionRegion_Growing.setObjectName("actionRegion_Growing")
-        self.actionRegion_Growing.triggered.connect(lambda: self.segment_region_grow((10, 10), 20))
+        self.actionRegion_Growing.triggered.connect(self.show_dialog_regiongrow)
 
         # action kmeans clustering
         self.actionKmeans_Clustering = QtWidgets.QAction(MainWindow)
         self.actionKmeans_Clustering.setObjectName("actionKmeans_Clustering")
-        self.actionKmeans_Clustering.triggered.connect(lambda: self.segment_kmeans_clustering(2))
+        self.actionKmeans_Clustering.triggered.connect(self.show_segment_cluster)
         
         # action watershed segmentesi
         self.actionWatershed_Segmentation = QtWidgets.QAction(MainWindow)
@@ -1536,7 +1593,7 @@ class Ui_MainWindow(object):
         # action global thresholding
         self.actionGlobal_Thresholding = QtWidgets.QAction(MainWindow)
         self.actionGlobal_Thresholding.setObjectName("actionGlobal_Thresholding")
-        self.actionGlobal_Thresholding.triggered.connect(lambda: self.segment_Global_Thresholding(100))
+        self.actionGlobal_Thresholding.triggered.connect(self.show_segment_globalthreshold)
 
         # action adaptive thresh mean
         self.actionAdaptive_Thresh_Mean = QtWidgets.QAction(MainWindow)
