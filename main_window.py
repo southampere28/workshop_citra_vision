@@ -12,6 +12,7 @@ import os
 import cv2
 from PIL import Image, ImageOps
 import numpy as np
+from skimage.morphology import skeletonize, thin
 import sys
 from io import BytesIO
 from matplotlib import pyplot as plt
@@ -1223,6 +1224,84 @@ class Ui_MainWindow(object):
         # delete temp file
         os.remove(temp_file_path)
 
+    def erosion(self, sq):
+        
+        iamgepath = self.imagePath
+
+        image = cv2.imread(iamgepath)  # Read in BGR format
+
+        # Convert BGR to RGB
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        if image is None:
+            print("Error: Could not load image. Check the image path.")
+            return
+        
+        sq_kernel = ''
+
+        # kernels define
+        if sq == 3:
+            sq_kernel = np.ones((3, 3), np.uint8)
+        elif sq == 5:
+            sq_kernel = np.ones((5, 5), np.uint8)
+        elif sq == "crk3":
+            sq_kernel = np.array([[0, 0, 1, 0, 0],
+                                [0, 0, 1, 0, 0],
+                                [1, 1, 1, 1, 1],
+                                [0, 0, 1, 0, 0],
+                                [0, 0, 1, 0, 0]], dtype=np.uint8)
+            
+
+        # erosion code
+        erosion = cv2.erode(image, sq_kernel, iterations=1)
+
+        output = Image.fromarray(erosion)
+
+        output.show()
+
+    def dilation(self, sq):
+        iamgepath = self.imagePath
+        
+        image = cv2.imread(iamgepath)  # Read in BGR format
+
+        sq_kernel = ''
+
+        # Convert BGR to RGB
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        if image is None:
+            print("Error: Could not load image. Check the image path.")
+            return
+        
+        if sq == 3:
+            sq_kernel = np.ones((3, 3), np.uint8)
+        elif sq == 5:
+            sq_kernel = np.ones((5, 5), np.uint8)
+        elif sq == 'crk3':
+             sq_kernel = np.array([[0, 0, 1, 0, 0],
+                                [0, 0, 1, 0, 0],
+                                [1, 1, 1, 1, 1],
+                                [0, 0, 1, 0, 0],
+                                [0, 0, 1, 0, 0]], dtype=np.uint8)
+
+        # square_kernel_3 = np.ones((3, 3), np.uint8)
+
+        # dilation code
+        dilation = cv2.dilate(image, sq_kernel, iterations=1)
+        
+        output = Image.fromarray(dilation)
+
+        output.show()
+    
+    def opening(self):
+        print
+
+    def closing(self):
+        print
+
+    def kernel_hit_or_miss(self):
+        print
+
     def show_crop_dialog(self):
         if not self.imagefile:
             QtWidgets.QMessageBox.warning(self, "Warning", "No image loaded.")
@@ -1639,20 +1718,38 @@ class Ui_MainWindow(object):
         self.actionPrewitt.setObjectName("actionPrewitt")
         self.actionSebel = QtWidgets.QAction(MainWindow)
         self.actionSebel.setObjectName("actionSebel")
+        
+        # erotion square 3
         self.actionSquare_4 = QtWidgets.QAction(MainWindow)
         self.actionSquare_4.setObjectName("actionSquare_4")
+        self.actionSquare_4.triggered.connect(lambda: self.erosion(3))
+        
+        # erotion square 5
         self.actionSquare_6 = QtWidgets.QAction(MainWindow)
         self.actionSquare_6.setObjectName("actionSquare_6")
+        self.actionSquare_6.triggered.connect(lambda: self.erosion(5))
+        
+        # erotion cross kernel
         self.actionCross_4 = QtWidgets.QAction(MainWindow)
         self.actionCross_4.setObjectName("actionCross_4")
+        self.actionCross_4.triggered.connect(lambda: self.erosion('crk3'))
+        
+        # dilation square 3
         self.actionSquare_7 = QtWidgets.QAction(MainWindow)
         self.actionSquare_7.setObjectName("actionSquare_7")
+        self.actionSquare_7.triggered.connect(self.dilation)        
+
+        # dilation square 5
         self.actionSquare_8 = QtWidgets.QAction(MainWindow)
         self.actionSquare_8.setObjectName("actionSquare_8")
+        self.actionSquare_8.triggered.connect(self.dilation)
+        
         self.actionCross_5 = QtWidgets.QAction(MainWindow)
         self.actionCross_5.setObjectName("actionCross_5")
+        
         self.actionSquare_9 = QtWidgets.QAction(MainWindow)
         self.actionSquare_9.setObjectName("actionSquare_9")
+        
         self.actionSquare_10 = QtWidgets.QAction(MainWindow)
         self.actionSquare_10.setObjectName("actionSquare_10")
         self.actionTes2 = QtWidgets.QAction(MainWindow)
