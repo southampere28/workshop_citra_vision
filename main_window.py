@@ -1230,7 +1230,10 @@ class Ui_MainWindow(object):
 
         image = cv2.imread(iamgepath)  # Read in BGR format
 
-        # Convert BGR to RGB
+        # convert binary
+        # _, image = cv2.threshold(load_image, 127, 255, cv2.THRESH_BINARY)
+
+        # convert RGB
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         if image is None:
@@ -1250,14 +1253,40 @@ class Ui_MainWindow(object):
                                 [1, 1, 1, 1, 1],
                                 [0, 0, 1, 0, 0],
                                 [0, 0, 1, 0, 0]], dtype=np.uint8)
-            
+        else:
+            print("Error: Invalid kernel size. Defaulting to 3x3.")
+            sq_kernel = np.ones((3, 3), np.uint8)
 
         # erosion code
         erosion = cv2.erode(image, sq_kernel, iterations=1)
 
         output = Image.fromarray(erosion)
 
-        output.show()
+        # output.show()
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
 
     def dilation(self, sq):
         iamgepath = self.imagePath
@@ -1291,16 +1320,177 @@ class Ui_MainWindow(object):
         
         output = Image.fromarray(dilation)
 
-        output.show()
+        # output.show()
+
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
     
     def opening(self):
-        print
+        imagepath = self.imagePath
+        
+        image = cv2.imread(imagepath)  # Read in BGR format
 
-    def closing(self):
-        print
+        sq_kernel = np.ones((9, 9), np.uint8)
+
+        # Convert BGR to RGB
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # morphology opening code
+        opening = cv2.morphologyEx(image,cv2.MORPH_OPEN ,sq_kernel)
+        
+        output = Image.fromarray(opening)
+
+        output.show()
+
+    def morph_closing(self):
+        imagepath = self.imagePath
+        
+        image = cv2.imread(imagepath)  # Read in BGR format
+
+        sq_kernel = np.ones((9, 9), np.uint8)
+
+        # Convert BGR to RGB
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # morphology opening code
+        closing = cv2.morphologyEx(image,cv2.MORPH_CLOSE ,sq_kernel)
+        
+        output = Image.fromarray(closing)
+
+        output.show()
 
     def kernel_hit_or_miss(self):
-        print
+        imagepath = self.imagePath
+        
+        load_image = cv2.imread(imagepath, 0) 
+
+        if load_image is None:
+            print("Error: Could not load image.")
+            return
+
+        # Convert BGR to RGB
+        _, image = cv2.threshold(load_image, 127, 255, cv2.THRESH_BINARY)
+
+        # kernel hit or miss
+        sq_kernel = np.array([[1, 1, 1]
+                              ,[0, 1, 0]
+                              ,[-1, -1, -1]])
+
+        # morphology opening code
+        hitormiss = cv2.morphologyEx(image,cv2.MORPH_HITMISS ,sq_kernel)
+        
+        output = Image.fromarray(hitormiss)
+
+        output.show()
+
+    def thinned_img(self):
+        imagepath = self.imagePath
+        
+        # Read the image in grayscale format
+        image_load = cv2.imread(imagepath, 0)  # 0 to load as grayscale
+
+        if image_load is None:
+            print("Error: Could not load image.")
+            return
+
+        # Convert the grayscale image to binary (values 0 or 255)
+        _, image = cv2.threshold(image_load, 127, 255, cv2.THRESH_BINARY)
+
+        # thinning code
+        thinned = thin(image // 255)  # Divide by 255 to get binary (0 or 1)
+        thinned = (thinned * 255).astype(np.uint8)  # Convert back to 255 scale for display
+
+        
+        output = Image.fromarray(thinned)
+
+        output.show()
+    
+    def thickening(self):
+        iamgepath = self.imagePath
+
+        image = cv2.imread(iamgepath)  # Read in BGR format
+
+        # convert binary
+        # _, image = cv2.threshold(load_image, 127, 255, cv2.THRESH_BINARY)
+
+        # convert RGB
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        if image is None:
+            print("Error: Could not load image. Check the image path.")
+            return
+        
+        sq_kernel = np.ones((3, 3), np.uint8)
+        
+        # erosion code
+        erosion = cv2.erode(image, sq_kernel, iterations=1)
+
+        # thickening
+        thickening = cv2.dilate(image, sq_kernel, iterations=1) - erosion
+
+        output = Image.fromarray(thickening)
+
+        output.show()
+    
+    def skeleton_convert(self):
+        iamgepath = self.imagePath
+
+         # Read the image in grayscale format
+        image = cv2.imread(iamgepath, 0)  # Load as grayscale
+
+        if image is None:
+            print("Error: Could not load image. Check the image path.")
+            return
+
+        # Convert the grayscale image to binary (values 0 or 255)
+        _, binary_image = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+
+        # Apply the skeletonize function (expecting binary image with 0 or 1)
+        skeleton = skeletonize(binary_image // 255)  # Divide by 255 to get binary (0 or 1)
+        skeleton = (skeleton * 255).astype(np.uint8)  # Convert back to 255 scale for display
+        
+        return skeleton
+
+    def skeleton(self):
+
+        skeleton = self.skeleton_convert()
+        
+        output = Image.fromarray(skeleton)
+
+        output.show()
+    
+    def prune_skeleton(self, iterations=1):
+        # skeleton code and kernel hitmiss
+        
+        pruned_img = self.skeleton_convert().copy()
+        for _ in range(iterations):
+            pruned_img = cv2.morphologyEx(pruned_img, cv2.MORPH_HITMISS, kernel_hitmiss)
+
+        output = Image.fromarray(pruned_img)
+
+        output.show()
 
     def show_crop_dialog(self):
         if not self.imagefile:
@@ -1737,21 +1927,34 @@ class Ui_MainWindow(object):
         # dilation square 3
         self.actionSquare_7 = QtWidgets.QAction(MainWindow)
         self.actionSquare_7.setObjectName("actionSquare_7")
-        self.actionSquare_7.triggered.connect(self.dilation)        
+        self.actionSquare_7.triggered.connect(lambda: self.dilation(3))        
 
         # dilation square 5
         self.actionSquare_8 = QtWidgets.QAction(MainWindow)
         self.actionSquare_8.setObjectName("actionSquare_8")
-        self.actionSquare_8.triggered.connect(self.dilation)
+        self.actionSquare_8.triggered.connect(lambda: self.dilation(5))        
         
+        # dilation square 3
         self.actionCross_5 = QtWidgets.QAction(MainWindow)
         self.actionCross_5.setObjectName("actionCross_5")
+        self.actionCross_5.triggered.connect(lambda: self.dilation('crk3'))        
         
+        # opening square 9
         self.actionSquare_9 = QtWidgets.QAction(MainWindow)
         self.actionSquare_9.setObjectName("actionSquare_9")
+        self.actionSquare_9.triggered.connect(self.opening)        
         
+        # closing square 9
         self.actionSquare_10 = QtWidgets.QAction(MainWindow)
         self.actionSquare_10.setObjectName("actionSquare_10")
+        self.actionSquare_10.triggered.connect(self.morph_closing)
+
+        # function that will being added next
+        # self.actionSquare_10.triggered.connect(self.kernel_hit_or_miss)
+        # self.actionSquare_10.triggered.connect(self.thinned_img)
+        # self.actionSquare_10.triggered.connect(self.thickening)
+        # self.actionSquare_10.triggered.connect(self.skeleton)
+        
         self.actionTes2 = QtWidgets.QAction(MainWindow)
         self.actionTes2.setObjectName("actionTes2")
         self.menuFile.addAction(self.actionOpenFile)
