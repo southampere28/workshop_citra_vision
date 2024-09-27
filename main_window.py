@@ -1631,7 +1631,30 @@ class Ui_MainWindow(object):
 
         output = Image.fromarray(pruned_img, mode='L')
 
-        output.show()
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
 
     def show_crop_dialog(self):
         if not self.imagefile:
@@ -2022,7 +2045,7 @@ class Ui_MainWindow(object):
         # self.actionIdentity.triggered.connect(lambda: self.segment_kmeans_clustering(2))
         # self.actionIdentity.triggered.connect(self.segment_watershed)
         # self.actionIdentity.triggered.connect(self.)
-        
+
         self.actionSharpen = QtWidgets.QAction(MainWindow)
         self.actionSharpen.setObjectName("actionSharpen")
         self.actionUnsharp_Masking = QtWidgets.QAction(MainWindow)
@@ -2088,15 +2111,28 @@ class Ui_MainWindow(object):
         # closing square 9
         self.actionSquare_10 = QtWidgets.QAction(MainWindow)
         self.actionSquare_10.setObjectName("actionSquare_10")
-        # self.actionSquare_10.triggered.connect(self.morph_closing)
-
-        # function that will being added next
-        # self.actionSquare_10.triggered.connect(self.kernel_hit_or_miss)
-        # self.actionSquare_10.triggered.connect(self.thinned_img)
-        # self.actionSquare_10.triggered.connect(self.thickening)
-        self.actionSquare_10.triggered.connect(self.skeleton)
-        # self.actionSquare_10.triggered.connect(lambda: self.prune_skeleton(2))
+        self.actionSquare_10.triggered.connect(self.morph_closing)
         
+        self.actionHitOrMiss = QtWidgets.QAction(MainWindow)
+        self.actionHitOrMiss.setObjectName("actionHitOrMiss")
+        self.actionHitOrMiss.triggered.connect(self.kernel_hit_or_miss)
+
+        self.actionTinning = QtWidgets.QAction(MainWindow)
+        self.actionTinning.setObjectName("actionTinning")
+        self.actionTinning.triggered.connect(self.thinned_img)
+        
+        self.actionThickening = QtWidgets.QAction(MainWindow)
+        self.actionThickening.setObjectName("actionThickening")
+        self.actionThickening.triggered.connect(self.thickening)
+        
+        self.actionSkeleton = QtWidgets.QAction(MainWindow)
+        self.actionSkeleton.setObjectName("actionSkeleton")
+        self.actionSkeleton.triggered.connect(self.skeleton)
+
+        self.actionPruning = QtWidgets.QAction(MainWindow)
+        self.actionPruning.setObjectName("actionPruning")
+        self.actionPruning.triggered.connect(lambda: self.prune_skeleton(2))
+
         self.actionTes2 = QtWidgets.QAction(MainWindow)
         self.actionTes2.setObjectName("actionTes2")
         self.menuFile.addAction(self.actionOpenFile)
@@ -2180,6 +2216,11 @@ class Ui_MainWindow(object):
         self.menuMorfologi.addAction(self.menuDilation.menuAction())
         self.menuMorfologi.addAction(self.menuOpening.menuAction())
         self.menuMorfologi.addAction(self.menuClosing.menuAction())
+        self.menuMorfologi.addAction(self.actionHitOrMiss)
+        self.menuMorfologi.addAction(self.actionTinning)
+        self.menuMorfologi.addAction(self.actionThickening)
+        self.menuMorfologi.addAction(self.actionSkeleton)
+        self.menuMorfologi.addAction(self.actionPruning)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuINput.menuAction())
         self.menubar.addAction(self.menuColors.menuAction())
@@ -2292,6 +2333,12 @@ class Ui_MainWindow(object):
         self.actionCross_5.setText(_translate("MainWindow", "Cross 3"))
         self.actionSquare_9.setText(_translate("MainWindow", "Square 9"))
         self.actionSquare_10.setText(_translate("MainWindow", "Square 9"))
+        self.actionHitOrMiss.setText(_translate("MainWindow", "Hit or Miss"))
+        self.actionTinning.setText(_translate("MainWindow", "Thinning"))
+        self.actionThickening.setText(_translate("MainWindow", "Thickening"))
+        self.actionSkeleton.setText(_translate("MainWindow", "Skeleton"))
+        self.actionPruning.setText(_translate("MainWindow", "Prunning"))
+
         self.actionTes2.setText(_translate("MainWindow", "tes2"))
 
 
