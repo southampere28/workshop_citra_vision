@@ -1656,6 +1656,123 @@ class Ui_MainWindow(object):
         # delete temp file
         os.remove(temp_file_path)
 
+    def sobel(self):
+        iamgepath = self.imagePath
+
+        image = cv2.imread(iamgepath, cv2.IMREAD_GRAYSCALE) 
+
+        sobel_x = cv2.Sobel(image, cv2.CV_64F, 1 , 0, ksize=3) # Gradien horizontal
+        sobel_y = cv2.Sobel(image, cv2.CV_64F, 1 , 0, ksize=3) # Gradien vertical
+        sobel_combined = cv2.magnitude(sobel_x, sobel_y)
+
+        sobel_combined = np.uint8(255 * sobel_combined / np.max(sobel_combined))
+        
+        output = Image.fromarray(sobel_combined)
+        
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
+    def prewitt(self):
+        iamgepath = self.imagePath
+
+        image = cv2.imread(iamgepath, cv2.IMREAD_GRAYSCALE) 
+
+        # Gunakan Sobel dengan skala 1 untuk simulasi Prewitt (Sobel di OpenCV adalah generalisasi Prewitt)
+        prewitt_x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)  # Derivatif di arah x
+        prewitt_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)  # Derivatif di arah y
+
+        # Kombinasikan hasil Prewitt pada arah x dan y
+        prewitt_combined = cv2.magnitude(prewitt_x, prewitt_y)
+
+        # Normalisasi hasil ke rentang [0, 255]
+        prewitt_combined = cv2.normalize(prewitt_combined, None, 0, 255, cv2.NORM_MINMAX)
+
+        # Konversi ke tipe uint8 agar bisa ditampilkan oleh OpenCV
+        prewitt_combined = np.uint8(prewitt_combined)
+
+        output = Image.fromarray(prewitt_combined)
+        
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
+    def canny(self):
+        iamgepath = self.imagePath
+
+        image = cv2.imread(iamgepath, cv2.IMREAD_GRAYSCALE) 
+
+        canny_edges = cv2.Canny(image, 100, 200)
+
+        output = Image.fromarray(canny_edges)
+
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
     def show_crop_dialog(self):
         if not self.imagefile:
             QtWidgets.QMessageBox.warning(self, "Warning", "No image loaded.")
@@ -2068,11 +2185,22 @@ class Ui_MainWindow(object):
         self.actionGaussian_Blur_3x3.setObjectName("actionGaussian_Blur_3x3")
         self.actionGaussian_Blur_3x5 = QtWidgets.QAction(MainWindow)
         self.actionGaussian_Blur_3x5.setObjectName("actionGaussian_Blur_3x5")
+        
+        # action prewitt
         self.actionPrewitt = QtWidgets.QAction(MainWindow)
         self.actionPrewitt.setObjectName("actionPrewitt")
+        self.actionPrewitt.triggered.connect(self.prewitt)
+        
+        # action sebel
         self.actionSebel = QtWidgets.QAction(MainWindow)
         self.actionSebel.setObjectName("actionSebel")
-        
+        self.actionSebel.triggered.connect(self.sobel)
+
+        # action canny
+        self.actionCanny = QtWidgets.QAction(MainWindow)
+        self.actionCanny.setObjectName("actionCanny")
+        self.actionCanny.triggered.connect(self.canny)
+
         # erotion square 3
         self.actionSquare_4 = QtWidgets.QAction(MainWindow)
         self.actionSquare_4.setObjectName("actionSquare_4")
@@ -2204,6 +2332,7 @@ class Ui_MainWindow(object):
         self.menuFilter.addAction(self.actionBandstop_Filter)
         self.menuEdge_Detection_2.addAction(self.actionPrewitt)
         self.menuEdge_Detection_2.addAction(self.actionSebel)
+        self.menuEdge_Detection_2.addAction(self.actionCanny)
         self.menuErosion.addAction(self.actionSquare_4)
         self.menuErosion.addAction(self.actionSquare_6)
         self.menuErosion.addAction(self.actionCross_4)
@@ -2325,6 +2454,7 @@ class Ui_MainWindow(object):
         self.actionGaussian_Blur_3x5.setText(_translate("MainWindow", "Gaussian Blur 3x5"))
         self.actionPrewitt.setText(_translate("MainWindow", "Prewitt"))
         self.actionSebel.setText(_translate("MainWindow", "Sobel"))
+        self.actionCanny.setText(_translate("MainWindow", "Canny"))
         self.actionSquare_4.setText(_translate("MainWindow", "Square 3"))
         self.actionSquare_6.setText(_translate("MainWindow", "Square 5"))
         self.actionCross_4.setText(_translate("MainWindow", "Cross 3"))
