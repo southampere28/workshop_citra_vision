@@ -24,6 +24,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from cropdialog import CropDialog
 from menusegmentasi import MenuSegmentasi as ms
+from aritmatika_panel import Ui_MainWindow_aritmatika
 
 class Ui_MainWindow(object):
 
@@ -1856,6 +1857,13 @@ class Ui_MainWindow(object):
         self.scene.clear()
         self.sceneOutput.clear()
 
+    def show_aritmetical(self):
+        # Method to show the arithmetic panel
+        self.arithmetic_panel = QtWidgets.QMainWindow()  # Create a new window
+        self.ui = Ui_MainWindow_aritmatika()  # Create an instance of the arithmetic panel
+        self.ui.setupUi(self.arithmetic_panel)  # Set up the UI in the new window
+        self.arithmetic_panel.show()  # Show the arithmetic panel
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1163, 500)
@@ -1919,8 +1927,12 @@ class Ui_MainWindow(object):
         self.menuTentang.setObjectName("menuTentang")
         self.menuHistogram_Equalization = QtWidgets.QMenu(self.menubar)
         self.menuHistogram_Equalization.setObjectName("menuHistogram_Equalization")
+        
+        # menu aritmetical operation
         self.menuAritmetical_Operation = QtWidgets.QMenu(self.menubar)
         self.menuAritmetical_Operation.setObjectName("menuAritmetical_Operation")
+        self.menuAritmetical_Operation.aboutToShow.connect(self.show_aritmetical)
+        
         self.menuFilter = QtWidgets.QMenu(self.menubar)
         self.menuFilter.setObjectName("menuFilter")
         self.menuEdge_Detection = QtWidgets.QMenu(self.menuFilter)
