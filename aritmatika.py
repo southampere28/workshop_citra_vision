@@ -42,25 +42,25 @@ class Aritmatika:
         return Image.fromarray(result)
 
 # Contoh penggunaan kelas Aritmatika
-image1_path = 'sample/apple.jpg'  # Ganti dengan path citra pertama
-image2_path = 'sample/image.jpeg'  # Ganti dengan path citra kedua
+# image1_path = 'sample/apple.jpg'  # Ganti dengan path citra pertama
+# image2_path = 'sample/image.jpeg'  # Ganti dengan path citra kedua
 
-aritmatika = Aritmatika(image1_path, image2_path)
+# aritmatika = Aritmatika(image1_path, image2_path)
 
 # Mendapatkan hasil operasi
-penjumlahan_result = aritmatika.penjumlahan()
-pengurangan_result = aritmatika.pengurangan()
-perkalian_result = aritmatika.perkalian()
-pembagian_result = aritmatika.pembagian()
-or_result = aritmatika.or_operation()
-and_result = aritmatika.and_operation()
-xor_result = aritmatika.xor_operation()
+# penjumlahan_result = aritmatika.penjumlahan()
+# pengurangan_result = aritmatika.pengurangan()
+# perkalian_result = aritmatika.perkalian()
+# pembagian_result = aritmatika.pembagian()
+# or_result = aritmatika.or_operation()
+# and_result = aritmatika.and_operation()
+# xor_result = aritmatika.xor_operation()
 
 # Menampilkan hasil menggunakan PIL
-penjumlahan_result.show(title="Hasil Penjumlahan")
-pengurangan_result.show(title="Hasil Pengurangan")
-perkalian_result.show(title="Hasil Perkalian")
-pembagian_result.show(title="Hasil Pembagian")
-or_result.show(title="Hasil OR")
-and_result.show(title="Hasil AND")
-xor_result.show(title="Hasil XOR")
+# penjumlahan_result.show(title="Hasil Penjumlahan")
+# pengurangan_result.show(title="Hasil Pengurangan")
+# perkalian_result.show(title="Hasil Perkalian")
+# pembagian_result.show(title="Hasil Pembagian")
+# or_result.show(title="Hasil OR")
+# and_result.show(title="Hasil AND")
+# xor_result.show(title="Hasil XOR")
