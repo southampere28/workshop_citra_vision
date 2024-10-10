@@ -27,6 +27,7 @@ from menusegmentasi import MenuSegmentasi as ms
 from aritmatika_panel import Ui_MainWindow_aritmatika
 from ekstraksi_fitur import extraction_feature as ef
 from filter_citra import filter_citra
+from colors_rgb import Rgb_filter
 
 class Ui_MainWindow(object):
 
@@ -1865,10 +1866,93 @@ class Ui_MainWindow(object):
         
         self.display_result(result)
 
+    def yellow_filter(self):
+        obj = Rgb_filter(self.imagefile)
+
+        result = obj.filter_kuning()
+        
+        self.display_img(result)
+    
+    def orange_filter(self):
+        obj = Rgb_filter(self.imagefile)
+
+        result = obj.filter_orange()
+        
+        self.display_img(result)
+    
+    def orange_filter(self):
+        obj = Rgb_filter(self.imagefile)
+
+        result = obj.filter_orange()
+        
+        self.display_img(result)
+
+    def cyan_filter(self):
+        obj = Rgb_filter(self.imagefile)
+
+        result = obj.filter_cyan()
+        
+        self.display_img(result)
+
+    def purple_filter(self):
+        obj = Rgb_filter(self.imagefile)
+
+        result = obj.filter_purple()
+        
+        self.display_img(result)
+
+    def grey_filter(self):
+        obj = Rgb_filter(self.imagefile)
+
+        result = obj.filter_grey()
+        
+        self.display_img(result)
+
+    def brown_filter(self):
+        obj = Rgb_filter(self.imagefile)
+
+        result = obj.filter_coklat()
+        
+        self.display_img(result)
+
+    def red_filter(self):
+        obj = Rgb_filter(self.imagefile)
+
+        result = obj.filter_merah()
+        
+        self.display_img(result)
+
     # menampilkan result dari function filter-filter
     def display_result(self, resImg):
         # Konversi array hasil ke gambar
         output = Image.fromarray(resImg.astype(np.uint8))
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
+    # menampilkan result dari function gambar pillow
+    def display_img(self, output):
         self.imageResult = output
 
         # Save the image to a temporary file
@@ -2128,20 +2212,34 @@ class Ui_MainWindow(object):
         
         self.actionGamma_Correction = QtWidgets.QAction(MainWindow)
         self.actionGamma_Correction.setObjectName("actionGamma_Correction")
+        
         self.actionKuning = QtWidgets.QAction(MainWindow)
         self.actionKuning.setObjectName("actionKuning")
+        self.actionKuning.triggered.connect(self.yellow_filter)
+
         self.actionOrange = QtWidgets.QAction(MainWindow)
         self.actionOrange.setObjectName("actionOrange")
+        self.actionOrange.triggered.connect(self.orange_filter)
+        
         self.actionCyan = QtWidgets.QAction(MainWindow)
         self.actionCyan.setObjectName("actionCyan")
+        self.actionCyan.triggered.connect(self.cyan_filter)
+
         self.actionPurple = QtWidgets.QAction(MainWindow)
         self.actionPurple.setObjectName("actionPurple")
+        self.actionPurple.triggered.connect(self.purple_filter)
+
         self.actionGrey = QtWidgets.QAction(MainWindow)
         self.actionGrey.setObjectName("actionGrey")
+        self.actionGrey.triggered.connect(self.grey_filter)
+
         self.actionCoklat = QtWidgets.QAction(MainWindow)
         self.actionCoklat.setObjectName("actionCoklat")
+        self.actionCoklat.triggered.connect(self.brown_filter)
+
         self.actionMerah = QtWidgets.QAction(MainWindow)
         self.actionMerah.setObjectName("actionMerah")
+        self.actionMerah.triggered.connect(self.red_filter)
 
         # RGB to Grayscale Average method
         self.actionAverage = QtWidgets.QAction(MainWindow)
