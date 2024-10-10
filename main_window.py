@@ -26,6 +26,7 @@ from cropdialog import CropDialog
 from menusegmentasi import MenuSegmentasi as ms
 from aritmatika_panel import Ui_MainWindow_aritmatika
 from ekstraksi_fitur import extraction_feature as ef
+from filter_citra import filter_citra
 
 class Ui_MainWindow(object):
 
@@ -1796,6 +1797,103 @@ class Ui_MainWindow(object):
             crop_rect = dialog.get_crop_rect()
             self.crop_image(crop_rect)
 
+    # Filter-filter disini
+    
+    def identify(self):
+        obj = filter_citra(self.imagefile)
+
+        result = obj.identity_filter()
+
+        self.display_result(result)
+
+    # sharpen
+    def sharpen_filter(self):
+        obj = filter_citra(self.imagefile)
+
+        result = obj.sharpen_filter()
+        
+        self.display_result(result)
+
+    # gaussian blur ada 2
+    def gaussian_blur_3x3(self):
+        obj = filter_citra(self.imagefile)
+
+        result = obj.gaussian_blur_3x3()
+        
+        self.display_result(result)
+
+    def gaussian_blur_3x5(self):
+        obj = filter_citra(self.imagefile)
+
+        result = obj.gaussian_blur_3x5()
+        
+        self.display_result(result)
+
+    # unsharp_masking
+    def unsharp_masking(self):
+        obj = filter_citra(self.imagefile)
+
+        result = obj.unsharp_masking()
+        
+        self.display_result(result)
+
+    def average_filter(self):
+        obj = filter_citra(self.imagefile)
+
+        result = obj.average_filter()
+        
+        self.display_result(result)
+    
+    def low_pass_filter(self):
+        obj = filter_citra(self.imagefile)
+
+        result = obj.low_pass_filter()
+        
+        self.display_result(result)
+
+    def high_pass_filter(self):
+        obj = filter_citra(self.imagefile)
+
+        result = obj.high_pass_filter()
+        
+        self.display_result(result)
+
+    def bandstop_filter(self):
+        obj = filter_citra(self.imagefile)
+
+        result = obj.bandstop_filter()
+        
+        self.display_result(result)
+
+    # menampilkan result dari function filter-filter
+    def display_result(self, resImg):
+        # Konversi array hasil ke gambar
+        output = Image.fromarray(resImg.astype(np.uint8))
+        self.imageResult = output
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            output.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        # self.graphicsView.fitInView(self.scene.itemsBoundingRect(), QtCore.Qt.KeepAspectRatio)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # delete temp file
+        os.remove(temp_file_path)
+
     def crop_image(self, rect):
         # Ensure an image is loaded
         if not self.imagefile:
@@ -2192,6 +2290,7 @@ class Ui_MainWindow(object):
         # identify Menu
         self.actionIdentity = QtWidgets.QAction(MainWindow)
         self.actionIdentity.setObjectName("actionIdentity")
+        self.actionIdentity.triggered.connect(self.identify)
         # self.actionIdentity.triggered.connect(lambda: self.segment_region_grow((10, 10), 20))
         # self.actionIdentity.triggered.connect(lambda: self.segment_kmeans_clustering(2))
         # self.actionIdentity.triggered.connect(self.segment_watershed)
@@ -2199,26 +2298,43 @@ class Ui_MainWindow(object):
 
         self.actionSharpen = QtWidgets.QAction(MainWindow)
         self.actionSharpen.setObjectName("actionSharpen")
+        self.actionSharpen.triggered.connect(self.sharpen_filter)
+
         self.actionUnsharp_Masking = QtWidgets.QAction(MainWindow)
         self.actionUnsharp_Masking.setObjectName("actionUnsharp_Masking")
+        self.actionUnsharp_Masking.triggered.connect(self.unsharp_masking)
+
         self.actionAverage_Filter = QtWidgets.QAction(MainWindow)
         self.actionAverage_Filter.setObjectName("actionAverage_Filter")
+        self.actionAverage_Filter.triggered.connect(self.average_filter)
+        
         self.actionLow_Pass_Filter = QtWidgets.QAction(MainWindow)
         self.actionLow_Pass_Filter.setObjectName("actionLow_Pass_Filter")
+        self.actionLow_Pass_Filter.triggered.connect(self.low_pass_filter)
+        
         self.actionHight_Pass_Filter = QtWidgets.QAction(MainWindow)
         self.actionHight_Pass_Filter.setObjectName("actionHight_Pass_Filter")
+        self.actionHight_Pass_Filter.triggered.connect(self.high_pass_filter)
+        
         self.actionBandstop_Filter = QtWidgets.QAction(MainWindow)
         self.actionBandstop_Filter.setObjectName("actionBandstop_Filter")
+        self.actionBandstop_Filter.triggered.connect(self.bandstop_filter)
+        
         self.actionEdge_Detection_1 = QtWidgets.QAction(MainWindow)
         self.actionEdge_Detection_1.setObjectName("actionEdge_Detection_1")
         self.actionEdge_Detection_2 = QtWidgets.QAction(MainWindow)
         self.actionEdge_Detection_2.setObjectName("actionEdge_Detection_2")
         self.actionEdge_Detection_3 = QtWidgets.QAction(MainWindow)
+        
         self.actionEdge_Detection_3.setObjectName("actionEdge_Detection_3")
+        
         self.actionGaussian_Blur_3x3 = QtWidgets.QAction(MainWindow)
         self.actionGaussian_Blur_3x3.setObjectName("actionGaussian_Blur_3x3")
+        self.actionGaussian_Blur_3x3.triggered.connect(self.gaussian_blur_3x3)
+        
         self.actionGaussian_Blur_3x5 = QtWidgets.QAction(MainWindow)
         self.actionGaussian_Blur_3x5.setObjectName("actionGaussian_Blur_3x5")
+        self.actionGaussian_Blur_3x5.triggered.connect(self.gaussian_blur_3x5)
         
         # action prewitt
         self.actionPrewitt = QtWidgets.QAction(MainWindow)
