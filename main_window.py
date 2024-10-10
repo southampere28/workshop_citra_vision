@@ -25,6 +25,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from cropdialog import CropDialog
 from menusegmentasi import MenuSegmentasi as ms
 from aritmatika_panel import Ui_MainWindow_aritmatika
+from ekstraksi_fitur import extraction_feature as ef
 
 class Ui_MainWindow(object):
 
@@ -1657,6 +1658,16 @@ class Ui_MainWindow(object):
         # delete temp file
         os.remove(temp_file_path)
 
+    def color_extraction(self):
+        result = ef.ekstraksi_warna(self.imagePath)
+
+        print(result)
+
+    def texture_extraction(self):
+        result = ef.ekstraksi_texture(self.imagePath)
+
+        print(result)
+
     def sobel(self):
         iamgepath = self.imagePath
 
@@ -1955,6 +1966,17 @@ class Ui_MainWindow(object):
         self.menuClear = QtWidgets.QMenu(self.menubar)
         self.menuClear.setObjectName("menuClear")
         self.menuClear.aboutToShow.connect(self.clearObj)
+
+        self.menuExtraction = QtWidgets.QMenu(self.menubar)
+        self.menuExtraction.setObjectName("menuExtraction")
+
+        self.actionEkstraksiWarna = QtWidgets.QAction(MainWindow)
+        self.actionEkstraksiWarna.setObjectName("actionEkstraksiWarna")
+        self.actionEkstraksiWarna.triggered.connect(self.color_extraction)
+        
+        self.actionEkstraksiTexture = QtWidgets.QAction(MainWindow)
+        self.actionEkstraksiTexture.setObjectName("actionEkstraksiTexture")
+        self.actionEkstraksiTexture.triggered.connect(self.texture_extraction)
 
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -2271,7 +2293,10 @@ class Ui_MainWindow(object):
 
         self.actionPruning = QtWidgets.QAction(MainWindow)
         self.actionPruning.setObjectName("actionPruning")
-        self.actionPruning.triggered.connect(lambda: self.prune_skeleton(2))
+        # self.actionPruning.triggered.connect(lambda: self.prune_skeleton(2))
+        self.actionPruning.triggered.connect(self.texture_extraction)
+
+        # self.action
 
         self.actionTes2 = QtWidgets.QAction(MainWindow)
         self.actionTes2.setObjectName("actionTes2")
@@ -2373,6 +2398,9 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuFilter.menuAction())
         self.menubar.addAction(self.menuEdge_Detection_2.menuAction())
         self.menubar.addAction(self.menuMorfologi.menuAction())
+        self.menubar.addAction(self.menuExtraction.menuAction())
+        self.menuExtraction.addAction(self.actionEkstraksiWarna)
+        self.menuExtraction.addAction(self.actionEkstraksiTexture)
         self.menubar.addAction(self.menuClear.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -2411,6 +2439,9 @@ class Ui_MainWindow(object):
         self.menuDilation.setTitle(_translate("MainWindow", "Dilation"))
         self.menuOpening.setTitle(_translate("MainWindow", "Opening"))
         self.menuClosing.setTitle(_translate("MainWindow", "Closing"))
+        self.menuExtraction.setTitle(_translate("MainWindow", "Ekstraksi Fitur"))
+        self.actionEkstraksiWarna.setText(_translate("MainWindow", "Ekstraksi Warna"))
+        self.actionEkstraksiTexture.setText(_translate("MainWindow", "Ekstraksi Texture"))
         self.menuClear.setTitle(_translate("MainWindow", "clear"))
         self.actionOpenFile.setText(_translate("MainWindow", "Open"))
         self.actionSaveAs.setText(_translate("MainWindow", "Save As"))
