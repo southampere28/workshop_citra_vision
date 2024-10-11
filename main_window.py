@@ -1922,6 +1922,24 @@ class Ui_MainWindow(object):
         
         self.display_img(result)
 
+    def apply_gamma_correction(self, gamma=1.0):
+        # Check if gamma is valid
+        if gamma <= 0:
+            raise ValueError("Gamma value must be greater than zero.")
+
+        image = self.imagefile
+
+        # Apply gamma correction
+        image_np = np.array(image)
+        inv_gamma = 1.0 / gamma
+        image_np = np.float32(image_np)  # Convert to float32 for gamma correction
+        image_np = np.power(image_np / 255.0, inv_gamma) * 255.0
+        image_np = np.uint8(image_np)
+
+        output = Image.fromarray(image_np)
+
+        self.display_img(output)
+
     # menampilkan result dari function filter-filter
     def display_result(self, resImg):
         # Konversi array hasil ke gambar
@@ -2212,6 +2230,7 @@ class Ui_MainWindow(object):
         
         self.actionGamma_Correction = QtWidgets.QAction(MainWindow)
         self.actionGamma_Correction.setObjectName("actionGamma_Correction")
+        self.actionGamma_Correction.triggered.connect(lambda: self.apply_gamma_correction(3.0))
         
         self.actionKuning = QtWidgets.QAction(MainWindow)
         self.actionKuning.setObjectName("actionKuning")
