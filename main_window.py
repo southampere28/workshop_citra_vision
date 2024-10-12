@@ -2075,6 +2075,9 @@ class Ui_MainWindow(object):
     def clearObj(self):
         self.scene.clear()
         self.sceneOutput.clear()
+        self.imagefile = None
+        self.imagePath = None
+        self.imageResult = None
 
     def show_aritmetical(self):
         # Method to show the arithmetic panel
