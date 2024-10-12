@@ -9,6 +9,7 @@
 
 
 import os
+import subprocess
 import cv2
 from PIL import Image, ImageOps
 import numpy as np
@@ -1940,6 +1941,13 @@ class Ui_MainWindow(object):
 
         self.display_img(output)
 
+    def show_tentang_dialog(self):
+        try:
+            # Menjalankan file 'python dialog_artimatika.py'
+            subprocess.run(["python", "dialog_tentang.py"], check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Error saat menjalankan dialog_tentang.py: {e}")
+
     # menampilkan result dari function filter-filter
     def display_result(self, resImg):
         # Konversi array hasil ke gambar
@@ -2134,8 +2142,11 @@ class Ui_MainWindow(object):
         self.menuBrightness.setObjectName("menuBrightness")
         self.menuBit_Depth = QtWidgets.QMenu(self.menuColors)
         self.menuBit_Depth.setObjectName("menuBit_Depth")
+
         self.menuTentang = QtWidgets.QMenu(self.menubar)
         self.menuTentang.setObjectName("menuTentang")
+        self.menuTentang.aboutToShow.connect(self.show_tentang_dialog)
+        
         self.menuHistogram_Equalization = QtWidgets.QMenu(self.menubar)
         self.menuHistogram_Equalization.setObjectName("menuHistogram_Equalization")
         
@@ -2146,8 +2157,6 @@ class Ui_MainWindow(object):
         
         self.menuFilter = QtWidgets.QMenu(self.menubar)
         self.menuFilter.setObjectName("menuFilter")
-        self.menuEdge_Detection = QtWidgets.QMenu(self.menuFilter)
-        self.menuEdge_Detection.setObjectName("menuEdge_Detection")
         self.menuGaussian_Blur = QtWidgets.QMenu(self.menuFilter)
         self.menuGaussian_Blur.setObjectName("menuGaussian_Blur")
         self.menuEdge_Detection_2 = QtWidgets.QMenu(self.menubar)
@@ -2437,13 +2446,6 @@ class Ui_MainWindow(object):
         self.actionBandstop_Filter.setObjectName("actionBandstop_Filter")
         self.actionBandstop_Filter.triggered.connect(self.bandstop_filter)
         
-        self.actionEdge_Detection_1 = QtWidgets.QAction(MainWindow)
-        self.actionEdge_Detection_1.setObjectName("actionEdge_Detection_1")
-        self.actionEdge_Detection_2 = QtWidgets.QAction(MainWindow)
-        self.actionEdge_Detection_2.setObjectName("actionEdge_Detection_2")
-        self.actionEdge_Detection_3 = QtWidgets.QAction(MainWindow)
-        
-        self.actionEdge_Detection_3.setObjectName("actionEdge_Detection_3")
         
         self.actionGaussian_Blur_3x3 = QtWidgets.QAction(MainWindow)
         self.actionGaussian_Blur_3x3.setObjectName("actionGaussian_Blur_3x3")
@@ -2586,13 +2588,9 @@ class Ui_MainWindow(object):
         self.menuHistogram_Equalization.addAction(self.actionHistogram_Equalization)
         self.menuHistogram_Equalization.addAction(self.actionFuzzy_HE_RGB)
         self.menuHistogram_Equalization.addAction(self.actionFuzzy_Grayscale)
-        self.menuEdge_Detection.addAction(self.actionEdge_Detection_1)
-        self.menuEdge_Detection.addAction(self.actionEdge_Detection_2)
-        self.menuEdge_Detection.addAction(self.actionEdge_Detection_3)
         self.menuGaussian_Blur.addAction(self.actionGaussian_Blur_3x3)
         self.menuGaussian_Blur.addAction(self.actionGaussian_Blur_3x5)
         self.menuFilter.addAction(self.actionIdentity)
-        self.menuFilter.addAction(self.menuEdge_Detection.menuAction())
         self.menuFilter.addAction(self.actionSharpen)
         self.menuFilter.addAction(self.menuGaussian_Blur.menuAction())
         self.menuFilter.addAction(self.actionUnsharp_Masking)
@@ -2664,7 +2662,6 @@ class Ui_MainWindow(object):
         self.menuHistogram_Equalization.setTitle(_translate("MainWindow", "Image Processing"))
         self.menuAritmetical_Operation.setTitle(_translate("MainWindow", "Aritmetical Operation"))
         self.menuFilter.setTitle(_translate("MainWindow", "Filter"))
-        self.menuEdge_Detection.setTitle(_translate("MainWindow", "Edge Detection"))
         self.menuGaussian_Blur.setTitle(_translate("MainWindow", "Gaussian Blur"))
         self.menuEdge_Detection_2.setTitle(_translate("MainWindow", "Edge Detection"))
         self.menuMorfologi.setTitle(_translate("MainWindow", "Morfologi"))
@@ -2723,9 +2720,6 @@ class Ui_MainWindow(object):
         self.actionLow_Pass_Filter.setText(_translate("MainWindow", "Low Pass Filter"))
         self.actionHight_Pass_Filter.setText(_translate("MainWindow", "High Pass Filter"))
         self.actionBandstop_Filter.setText(_translate("MainWindow", "Bandstop Filter"))
-        self.actionEdge_Detection_1.setText(_translate("MainWindow", "Edge Detection 1"))
-        self.actionEdge_Detection_2.setText(_translate("MainWindow", "Edge Detection 2"))
-        self.actionEdge_Detection_3.setText(_translate("MainWindow", "Edge Detection 3"))
         self.actionGaussian_Blur_3x3.setText(_translate("MainWindow", "Gaussian Blur 3x3"))
         self.actionGaussian_Blur_3x5.setText(_translate("MainWindow", "Gaussian Blur 3x5"))
         self.actionPrewitt.setText(_translate("MainWindow", "Prewitt"))
